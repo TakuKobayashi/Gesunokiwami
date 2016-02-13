@@ -37,3 +37,5 @@ app/build/
 build/
 captures/
 app/src/main/assets/
+app/libs/live2d*
+app/src/main/java/jp/live2d/

@@ -13,7 +13,16 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.vrtoolkit.cardboard.CardboardActivity;
+import com.google.vrtoolkit.cardboard.CardboardView;
+import com.google.vrtoolkit.cardboard.Eye;
+import com.google.vrtoolkit.cardboard.FieldOfView;
+import com.google.vrtoolkit.cardboard.HeadTransform;
+import com.google.vrtoolkit.cardboard.Viewport;
+
 import java.util.HashMap;
+
+import javax.microedition.khronos.egl.EGLConfig;
 
 import jp.live2d.sample.LAppDefine;
 import jp.live2d.sample.LAppLive2DManager;
@@ -21,7 +30,7 @@ import jp.live2d.sample.LAppView;
 import jp.live2d.utils.android.FileManager;
 import jp.live2d.utils.android.SoundManager;
 
-public class MainActivity extends Activity {
+public class MainActivity extends CardboardActivity{
 
     //  Live2Dの管理
     private LAppLive2DManager live2DMgr ;
@@ -57,11 +66,12 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // GUIを初期化
         setupGUI();
+
         FileManager.init(this.getApplicationContext());
+        /*
         SocketIOStreamer.getInstance(SocketIOStreamer.class).setOnReceiveCallback(new SocketIOStreamer.SocketIOEventCallback() {
             @Override
             public void onCall(String receive) {
@@ -73,6 +83,7 @@ public class MainActivity extends Activity {
                 Log.d(Config.TAG, "emitted:" + emitted);
             }
         });
+        */
     }
 
 
@@ -91,13 +102,21 @@ public class MainActivity extends Activity {
         FrameLayout layout=(FrameLayout) findViewById(R.id.live2DLayout);
         layout.addView(view, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-
         // モデル切り替えボタン
         ImageButton iBtn = (ImageButton)findViewById(R.id.imageButton1);
         ClickListener listener = new ClickListener();
         iBtn.setOnClickListener(listener);
-    }
 
+        //以下、カードボードbの設定
+        /*
+        CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
+        Log.d(Config.TAG, "view: " + cardboardView);
+        // Associate a CardboardView.StereoRenderer with cardboardView.
+        cardboardView.setRenderer(this);
+        // Associate the cardboardView with this activity.
+        setCardboardView(cardboardView);
+        */
+    }
 
     // ボタンを押した時のイベント
     class ClickListener implements View.OnClickListener {
@@ -108,7 +127,6 @@ public class MainActivity extends Activity {
             live2DMgr.changeModel();//Live2D Event
         }
     }
-
 
     /*
      * Activityを再開したときのイベント。
@@ -130,4 +148,40 @@ public class MainActivity extends Activity {
         live2DMgr.onPause() ;
         super.onPause();
     }
+
+    //以下、StereoRendererで必要なもの
+    /*
+    @Override
+    public void onNewFrame(HeadTransform headTransform) {
+        Log.d(Config.TAG, "VRNewFrame!!");
+    }
+
+    @Override
+    public void onDrawEye(Eye eye) {
+        Viewport viewport = eye.getViewport();
+        Log.d(Config.TAG, "VREye!! x:" + viewport.x + " y:" + viewport.y + " w:" + viewport.width + " h:" + viewport.height);
+        FieldOfView fv = eye.getFov();
+        Log.d(Config.TAG, "VREye!! l:" + fv.getLeft() + " t:" + fv.getTop() + " r:" + fv.getRight() + " b:" + fv.getBottom());
+    }
+
+    @Override
+    public void onFinishFrame(Viewport viewport) {
+        Log.d(Config.TAG, "VRFinishFrame!! x:" + viewport.x + " y:" + viewport.y + " w:" + viewport.width + " h:" + viewport.height);
+    }
+
+    @Override
+    public void onSurfaceChanged(int i, int i1) {
+        Log.d(Config.TAG, "VRChanged!! i:" + i + " i1:" + i1);
+    }
+
+    @Override
+    public void onSurfaceCreated(EGLConfig eglConfig) {
+        Log.d(Config.TAG, "VRCreated!!" + eglConfig);
+    }
+
+    @Override
+    public void onRendererShutdown() {
+        Log.d(Config.TAG, "VRshutdown!!");
+    }
+    */
 }

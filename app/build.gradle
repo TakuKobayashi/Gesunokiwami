@@ -24,12 +24,13 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile files('libs/live2d_android.jar')
-    compile ('io.socket:socket.io-client:0.7.0') {
+    compile('io.socket:socket.io-client:0.7.0') {
         // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
     }
-    compile ('io.socket:engine.io-client:0.7.0') {
+    compile('io.socket:engine.io-client:0.7.0') {
         // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
     }
+    compile files('libs/cardboard.jar')
 }

@@ -3,6 +3,9 @@
     package="day.hack.com.gesunokiwami">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Make accelerometer and gyroscope hard requirements for good head tracking. -->
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true"/>
+    <uses-feature android:name="android.hardware.sensor.gyroscope" android:required="true"/>
 
     <application
         android:name="day.hack.com.gesunokiwami.GesunokiwamiApplication"
@@ -12,7 +15,11 @@
         android:supportsRtl="true"
         android:screenOrientation="landscape"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

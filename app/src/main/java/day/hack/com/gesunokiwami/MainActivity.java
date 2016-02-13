@@ -35,6 +35,7 @@ public class MainActivity extends CardboardActivity{
     //  Live2Dの管理
     private LAppLive2DManager live2DMgr ;
     static private Activity instance;
+    private Config.GrabState currentGrabState = Config.GrabState.none;
 
     public MainActivity( )
     {
@@ -107,8 +108,13 @@ public class MainActivity extends CardboardActivity{
         iBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "change model", Toast.LENGTH_SHORT).show();
-                live2DMgr.changeModel();//Live2D Event
+                //if(currentGrabState != Config.GrabState.none) return;
+                Config.GrabState[] states = Config.GrabState.values();
+                int order = currentGrabState.ordinal();
+                int newOrder = (order + 1) % (states.length - 1);
+                currentGrabState = states[newOrder];
+                live2DMgr.getModel(0).startMotion(currentGrabState.toString(), 0, LAppDefine.PRIORITY_FORCE);
+                //live2DMgr.changeModel();//Live2D Event
             }
         });
 

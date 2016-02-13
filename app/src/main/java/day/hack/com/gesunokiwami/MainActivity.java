@@ -1,9 +1,14 @@
 package day.hack.com.gesunokiwami;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.hardware.Camera;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -20,6 +25,8 @@ import com.google.vrtoolkit.cardboard.FieldOfView;
 import com.google.vrtoolkit.cardboard.HeadTransform;
 import com.google.vrtoolkit.cardboard.Viewport;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -31,12 +38,14 @@ import jp.live2d.utils.android.FileManager;
 import jp.live2d.utils.android.SoundManager;
 
 public class MainActivity extends CardboardActivity{
+    private static int REQUEST_CODE = 1;
 
     //  Live2Dの管理
     private LAppLive2DManager live2DMgr ;
     static private Activity instance;
     private int grabCount = 0;
     private int currentState = Config.RESET_STATE;
+    private Camera mCamera;
 
     public MainActivity( )
     {
@@ -90,6 +99,23 @@ public class MainActivity extends CardboardActivity{
                 Log.d(Config.TAG, "emitted:" + emitted);
             }
         });
+        requestPermission();
+    }
+
+    private void requestPermission(){
+        if(Build.VERSION.SDK_INT >= 23) {
+            ArrayList<String> permissions = ApplicationHelper.getSettingPermissions(this);
+            boolean isRequestPermission = false;
+            for(String permission : permissions){
+                if(!ApplicationHelper.hasSelfPermission(this, permission)){
+                    isRequestPermission = true;
+                    break;
+                }
+            }
+            if(isRequestPermission) {
+                requestPermissions(permissions.toArray(new String[0]), REQUEST_CODE);
+            }
+        }
     }
 
 
@@ -107,6 +133,7 @@ public class MainActivity extends CardboardActivity{
         // activity_main.xmlにLive2DのViewをレイアウトする
         FrameLayout layout=(FrameLayout) findViewById(R.id.live2DLayout);
         layout.addView(view, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        layout.setBackgroundColor(Color.argb(0,0,0,0));
 
         // モデル切り替えボタン
         ImageButton iBtn = (ImageButton)findViewById(R.id.imageButton1);
@@ -163,10 +190,10 @@ public class MainActivity extends CardboardActivity{
     @Override
     protected void onResume()
     {
-        //live2DMgr.onResume() ;
+        live2DMgr.onResume() ;
+        setupCamera();
         super.onResume();
     }
-
 
     /*
      * Activityを停止したときのイベント。
@@ -175,7 +202,71 @@ public class MainActivity extends CardboardActivity{
     protected void onPause()
     {
         live2DMgr.onPause() ;
+        releaseCamera();
         super.onPause();
+    }
+
+    private void setupCamera(){
+        try {
+            mCamera = Camera.open(); // attempt to get a Camera instance
+        } catch (Exception e) {
+            // Camera is not available (in use or does not exist)
+            return;
+        }
+        SurfaceView preview = (SurfaceView) findViewById(R.id.camera_preview);
+        SurfaceHolder holder = preview.getHolder();
+        holder.addCallback(new SurfaceHolder.Callback() {
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                releaseCamera();
+            }
+
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                if (mCamera != null) {
+                    try {
+                        mCamera.setPreviewDisplay(holder);
+                    } catch (IOException exception) {
+                        releaseCamera();
+                    }
+                }
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                if (mCamera != null) {
+                    try {
+                        mCamera.setPreviewDisplay(holder);
+                    } catch (IOException exception) {
+                        releaseCamera();
+                    }
+                }
+            }
+        });
+        if(Build.VERSION.SDK_INT < 11){
+            holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        }
+        try {
+            mCamera.setPreviewDisplay(holder);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mCamera.stopPreview();
+        //今回はフロントカメラのみなのでCameraIdは0のみ使う
+        mCamera.setDisplayOrientation(ApplicationHelper.getCameraDisplayOrientation(this, 0));
+        mCamera.startPreview();
+    }
+
+
+    private void releaseCamera(){
+        if (mCamera != null){
+            mCamera.cancelAutoFocus();
+            mCamera.stopPreview();
+            mCamera.setPreviewCallback(null);
+            mCamera.release();
+            mCamera = null;
+        };
     }
 
     //以下、StereoRendererで必要なもの

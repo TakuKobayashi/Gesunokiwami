@@ -13,6 +13,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 import jp.live2d.sample.LAppDefine;
 import jp.live2d.sample.LAppLive2DManager;
 import jp.live2d.sample.LAppView;
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
     {
         SoundManager.release();
         instance.finish();
+        SocketIOStreamer.getInstance(SocketIOStreamer.class).release();
     }
 
 
@@ -59,6 +62,17 @@ public class MainActivity extends Activity {
         // GUIを初期化
         setupGUI();
         FileManager.init(this.getApplicationContext());
+        SocketIOStreamer.getInstance(SocketIOStreamer.class).setOnReceiveCallback(new SocketIOStreamer.SocketIOEventCallback() {
+            @Override
+            public void onCall(String receive) {
+                Log.d(Config.TAG, "recieve:" + receive);
+            }
+
+            @Override
+            public void onEmit(HashMap<String, Object> emitted) {
+                Log.d(Config.TAG, "emitted:" + emitted);
+            }
+        });
     }
 
 

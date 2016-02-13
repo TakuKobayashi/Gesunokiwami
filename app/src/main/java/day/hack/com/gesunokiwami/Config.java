@@ -7,8 +7,9 @@ public class Config {
 
 	public enum GrabState{
 		touch,
-		suprise,
+		surprise,
 		pervert,
-		monster
+		monster,
+		none
 	}
 }

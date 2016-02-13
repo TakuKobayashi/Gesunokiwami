@@ -167,7 +167,7 @@ public class MainActivity extends CardboardActivity{
             resetState();
             return;
         }
-        boolean changeState = (currentState == Config.OPEN_STATE && state == Config.GRAB_STATE) || (currentState == Config.GRAB_STATE && state == Config.OPEN_STATE);
+        boolean changeState = ((currentState == Config.OPEN_STATE && state == Config.GRAB_STATE) || (currentState == Config.GRAB_STATE && state == Config.OPEN_STATE)) && live2DMgr.getModel(0).isMotionReady();
         if(changeState) {
             ++grabCount;
         }

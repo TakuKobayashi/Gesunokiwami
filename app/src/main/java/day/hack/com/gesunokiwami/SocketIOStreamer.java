@@ -50,12 +50,12 @@ public class SocketIOStreamer extends ContextSingletonBase<SocketIOStreamer> {
                     }
                 }
             });
-            mSocket.on("message", new Emitter.Listener() {
+            mSocket.on("grab", new Emitter.Listener() {
                 @Override
                 public void call(Object... arg0) {
-                    Log.d(Config.TAG, "message!!");
+                    Log.d(Config.TAG, "grab!!");
                     for(Object o : arg0){
-                        Log.d(Config.TAG, "message:" + o.toString());
+                        Log.d(Config.TAG, "grab:" + o.toString());
                     }
                 }
             });
@@ -66,21 +66,6 @@ public class SocketIOStreamer extends ContextSingletonBase<SocketIOStreamer> {
                     for (Object o : arg0) {
                         Log.d(Config.TAG, "discomment:" + o.toString());
                     }
-                }
-            });
-            mSocket.on("tweetInfo", new Emitter.Listener() {
-                @Override
-                public void call(Object... arg0) {
-                    Log.d(Config.TAG, "tweetInfo");
-                    values = arg0;
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            for(Object o : values){
-                                if(mCallback != null) mCallback.onCall(o.toString());
-                            }
-                        }
-                    });
                 }
             });
         } catch (URISyntaxException e) {

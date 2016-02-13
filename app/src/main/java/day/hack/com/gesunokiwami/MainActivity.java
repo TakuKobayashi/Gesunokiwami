@@ -35,7 +35,8 @@ public class MainActivity extends CardboardActivity{
     //  Live2Dの管理
     private LAppLive2DManager live2DMgr ;
     static private Activity instance;
-    private Config.GrabState currentGrabState = Config.GrabState.none;
+    private int grabCount = 0;
+    private int currentState = Config.RESET_STATE;
 
     public MainActivity( )
     {
@@ -72,11 +73,16 @@ public class MainActivity extends CardboardActivity{
         setupGUI();
 
         FileManager.init(this.getApplicationContext());
-        /*
         SocketIOStreamer.getInstance(SocketIOStreamer.class).setOnReceiveCallback(new SocketIOStreamer.SocketIOEventCallback() {
             @Override
             public void onCall(String receive) {
                 Log.d(Config.TAG, "recieve:" + receive);
+                try {
+                    motionCountUp(Integer.parseInt(receive));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    return;
+                }
             }
 
             @Override
@@ -84,7 +90,6 @@ public class MainActivity extends CardboardActivity{
                 Log.d(Config.TAG, "emitted:" + emitted);
             }
         });
-        */
     }
 
 
@@ -105,15 +110,10 @@ public class MainActivity extends CardboardActivity{
 
         // モデル切り替えボタン
         ImageButton iBtn = (ImageButton)findViewById(R.id.imageButton1);
-        iBtn.setOnClickListener(new View.OnClickListener(){
+        iBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //if(currentGrabState != Config.GrabState.none) return;
-                Config.GrabState[] states = Config.GrabState.values();
-                int order = currentGrabState.ordinal();
-                int newOrder = (order + 1) % (states.length - 1);
-                currentGrabState = states[newOrder];
-                live2DMgr.getModel(0).startMotion(currentGrabState.toString(), 0, LAppDefine.PRIORITY_FORCE);
+                motionCountUp(currentState == Config.OPEN_STATE ? Config.GRAB_STATE : Config.OPEN_STATE);
                 //live2DMgr.changeModel();//Live2D Event
             }
         });
@@ -127,6 +127,34 @@ public class MainActivity extends CardboardActivity{
         // Associate the cardboardView with this activity.
         setCardboardView(cardboardView);
         */
+    }
+
+    private void resetState() {
+        currentState = Config.RESET_STATE;
+        grabCount = 0;
+    }
+
+    // TODO モーション再生中はカウントアップさせない
+    private void motionCountUp(int state){
+        if(state == Config.RESET_STATE) {
+            resetState();
+            return;
+        }
+        boolean changeState = (currentState == Config.OPEN_STATE && state == Config.GRAB_STATE) || (currentState == Config.GRAB_STATE && state == Config.OPEN_STATE);
+        if(changeState) {
+            ++grabCount;
+        }
+        currentState = state;
+        if(!changeState) {
+            return;
+        }
+        int motionNum = grabCount / 2;
+        Config.GrabState[] states = Config.GrabState.values();
+        if(motionNum >= states.length){
+            motionNum = states.length - 1;
+        }
+        if(grabCount % 2 == 0) return;
+        live2DMgr.getModel(0).startMotion(states[motionNum].toString(), 0, LAppDefine.PRIORITY_FORCE);
     }
 
     /*

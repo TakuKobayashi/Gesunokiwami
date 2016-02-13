@@ -53,9 +53,12 @@ public class SocketIOStreamer extends ContextSingletonBase<SocketIOStreamer> {
             mSocket.on("grab", new Emitter.Listener() {
                 @Override
                 public void call(Object... arg0) {
-                    Log.d(Config.TAG, "grab!!");
+                    //Log.d(Config.TAG, "grab!!");
                     for(Object o : arg0){
-                        Log.d(Config.TAG, "grab:" + o.toString());
+                        if(mCallback != null) {
+                            mCallback.onCall(o.toString());
+                        }
+                        //Log.d(Config.TAG, "grab:" + o.toString());
                     }
                 }
             });

@@ -104,8 +104,13 @@ public class MainActivity extends CardboardActivity{
 
         // モデル切り替えボタン
         ImageButton iBtn = (ImageButton)findViewById(R.id.imageButton1);
-        ClickListener listener = new ClickListener();
-        iBtn.setOnClickListener(listener);
+        iBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "change model", Toast.LENGTH_SHORT).show();
+                live2DMgr.changeModel();//Live2D Event
+            }
+        });
 
         //以下、カードボードbの設定
         /*
@@ -116,16 +121,6 @@ public class MainActivity extends CardboardActivity{
         // Associate the cardboardView with this activity.
         setCardboardView(cardboardView);
         */
-    }
-
-    // ボタンを押した時のイベント
-    class ClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getApplicationContext(), "change model", Toast.LENGTH_SHORT).show();
-            live2DMgr.changeModel();//Live2D Event
-        }
     }
 
     /*
